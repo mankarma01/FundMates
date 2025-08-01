@@ -16,7 +16,7 @@ const app = express();
 // ✅ Enable CORS
 app.use(
   cors({
-    origin: "https://thriving-puppy-0bd81c.netlify.app/login", // Replace with your React frontend URL
+    origin: "https://thriving-puppy-0bd81c.netlify.app", // Replace with your React frontend URL
     credentials: true,
   })
 );
