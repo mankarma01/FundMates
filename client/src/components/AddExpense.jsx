@@ -19,14 +19,17 @@ function AddExpense() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const userRes = await axios.get("http://localhost:3000/api/users", {
+        // const userRes = await axios.get("https://fundmates-backend.onrender.com/api/users", {
         //   headers: { Authorization: `Bearer ${token}` },
         // });
         // setAllUsers(userRes.data);
 
-        const groupRes = await axios.get("http://localhost:3000/api/groups", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const groupRes = await axios.get(
+          "https://fundmates-backend.onrender.com/api/groups",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setGroups(groupRes.data);
         console.log("Groups fetched:", groupRes.data);
       } catch (err) {
@@ -40,7 +43,7 @@ function AddExpense() {
     e.preventDefault();
     try {
       await axios.post(
-        "http://localhost:3000/api/expenses",
+        "https://fundmates-backend.onrender.com/api/expenses",
         {
           title,
           amount,

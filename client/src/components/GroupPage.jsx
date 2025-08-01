@@ -18,9 +18,12 @@ function GroupsPage() {
     const token = localStorage.getItem("token");
     const fetchGroups = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/groups", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          "https://fundmates-backend.onrender.com/api/groups",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setGroups(res.data);
       } catch (err) {
         console.error("Error fetching groups:", err);

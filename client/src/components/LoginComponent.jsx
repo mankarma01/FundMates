@@ -15,10 +15,13 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:3000/api/users/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "https://fundmates-backend.onrender.com/api/users/login",
+        {
+          email,
+          password,
+        }
+      );
 
       console.log(res.data);
       console.log("Sucess");

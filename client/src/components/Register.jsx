@@ -17,11 +17,14 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:3000/api/users/register", {
-        name,
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "https://fundmates-backend.onrender.com/api/users/register",
+        {
+          name,
+          email,
+          password,
+        }
+      );
 
       alert("Registration successful!");
       navigate("/login");

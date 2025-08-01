@@ -15,7 +15,7 @@ const GroupDetails = () => {
     const fetchGroupDetails = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/groups/${groupId}`,
+          `https://fundmates-backend.onrender.com/api/groups/${groupId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -37,7 +37,7 @@ const GroupDetails = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          `http://localhost:3000/api/expenses/group/${groupId}`,
+          `https://fundmates-backend.onrender.com/api/expenses/group/${groupId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

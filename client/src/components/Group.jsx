@@ -45,7 +45,7 @@ export default function Group({ onClose, onGroupCreated }) {
 
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/users/by-email/${email}`,
+        `https://fundmates-backend.onrender.com/api/users/by-email/${email}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -89,7 +89,7 @@ export default function Group({ onClose, onGroupCreated }) {
     try {
       const token = localStorage.getItem("token");
       const { data } = await axios.post(
-        "http://localhost:3000/api/groups",
+        "https://fundmates-backend.onrender.com/api/groups",
         {
           groupName,
           members: memberIds.map((id, index) => ({
