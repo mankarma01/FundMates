@@ -5,7 +5,7 @@ const groupRoutes = require("./routes/groupRoutes");
 
 const express = require("express");
 const cors = require("cors"); // ✅ Add this
-const dotenv = require("dotenv").config();
+const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 
 dotenv.config();
@@ -24,7 +24,7 @@ app.use(
 app.use(express.json());
 
 // ✅ Routes
- // app.use("/api/auth", authRoutes);
+// app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/groups", groupRoutes);
