@@ -5,7 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 
 const express = require("express");
 const cors = require("cors"); // ✅ Add this
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config();
 const connectDB = require("./config/db");
 
 dotenv.config();
@@ -16,7 +16,7 @@ const app = express();
 // ✅ Enable CORS
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your React frontend URL
+    origin: "https://thriving-puppy-0bd81c.netlify.app/login", // Replace with your React frontend URL
     credentials: true,
   })
 );
