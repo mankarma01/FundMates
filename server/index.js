@@ -1,7 +1,7 @@
 const expenseRoutes = require("./routes/expenseRoutes");
 const userRoutes = require("./routes/userRoutes");
 const groupRoutes = require("./routes/groupRoutes");
-const authRoutes = require("./routes/authRoutes");
+// const authRoutes = require("./routes/authRoutes");
 
 const express = require("express");
 const cors = require("cors"); // ✅ Add this
@@ -24,7 +24,7 @@ app.use(
 app.use(express.json());
 
 // ✅ Routes
-app.use("/api/auth", authRoutes);
+ // app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/groups", groupRoutes);
