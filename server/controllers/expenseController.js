@@ -30,7 +30,7 @@ exports.createExpense = async (req, res) => {
   }
 };
 
-// Get all expenses for logged-in user (personal + where user paid)
+// Get all expenses for logged-in user (personal + where user paid //)
 exports.getMyExpenses = async (req, res) => {
   try {
     const expenses = await Expense.find({
