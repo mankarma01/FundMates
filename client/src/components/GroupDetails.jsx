@@ -21,6 +21,7 @@ const GroupDetails = () => {
           }
         );
         setGroup(res.data);
+        console.log(res.data);
         setMemberNames(res.data.members);
       } catch (err) {
         console.error("Error loading group details:", err);
@@ -43,6 +44,7 @@ const GroupDetails = () => {
           }
         );
         setExpenses(res.data);
+        console.log(res.data);
       } catch (err) {
         console.error("Failed to fetch expenses", err);
       }
@@ -59,10 +61,10 @@ const GroupDetails = () => {
   // Calculate fixed summary values
   const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const youPaid = expenses
-    .filter((exp) => exp.paidBy === user.id)
+    .filter((exp) => exp.paidBy?.userId === user.id)
     .reduce((sum, exp) => sum + exp.amount, 0);
   const othersPaid = expenses
-    .filter((exp) => exp.paidBy !== user.id)
+    .filter((exp) => exp.paidBy?.userId !== user.id)
     .reduce((sum, exp) => sum + exp.amount, 0);
   const memberCount = memberNames.length || 1;
   const yourShare = othersPaid / memberCount;

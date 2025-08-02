@@ -10,6 +10,7 @@ import {
 function Dashboard() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [groups, setGroups] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -19,6 +20,28 @@ function Dashboard() {
     } else {
       setUser(userData);
     }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const fetchGroups = async () => {
+      try {
+        const res = await axios.get(
+          "https://fundmates-backend.onrender.com/api/groups",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setGroups(res.data);
+      } catch (err) {
+        console.error("Error fetching groups:", err);
+        setError("Failed to load groups");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGroups();
   }, []);
 
   const handleLogout = () => {
@@ -58,7 +81,7 @@ function Dashboard() {
         <div className="bg-white/30 rounded-2xl p-6 shadow-md flex items-center space-x-4 backdrop-blur-md">
           <UserGroupIcon className="h-10 w-10 text-white" />
           <div>
-            <p className="text-lg font-bold">5</p>
+            <p className="text-lg font-bold">{groups.length}</p>
             <p className="text-sm text-white/80">Groups Joined</p>
           </div>
         </div>
