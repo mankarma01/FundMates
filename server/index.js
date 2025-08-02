@@ -16,10 +16,11 @@ const app = express();
 // ✅ Enable CORS
 app.use(
   cors({
-    origin: "https://thriving-puppy-0bd81c.netlify.app", // Replace with your React frontend URL
+    origin: "https://incandescent-pastelito-21f7fa.netlify.app", // ✅ NEW frontend URL
     credentials: true,
   })
 );
+
 
 app.use(express.json());
 
