@@ -12,6 +12,7 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -53,6 +54,33 @@ function Dashboard() {
     fetchGroups();
   }, []);
 
+  useEffect(() => {
+    console.log(user);
+    const token = localStorage.getItem("token");
+    //   if (!user) return;
+    console.log(token);
+    const fetchExpenses = async () => {
+      try {
+        setLoading(true);
+        console.log(token);
+        const res = await axios.get(
+          "https://fundmates-backend.onrender.com/api/expenses",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setExpenses(res.data);
+        console.log(res.data);
+      } catch (err) {
+        console.error("Error fetching groups:", err);
+        setError("Failed to load groups");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExpenses();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -62,6 +90,11 @@ function Dashboard() {
   if (loading) {
     return <p className="text-cneter text-gray-500">Loading...</p>;
   }
+
+  const totalSpent = expenses.data.reduce(
+    (acc, expense) => acc + expense.amount,
+    0
+  );
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-300 font-inter p-6 pt-16">
       {/* Header */}
@@ -107,7 +140,7 @@ function Dashboard() {
         <div className="bg-white/30 rounded-2xl p-6 shadow-md flex items-center space-x-4 backdrop-blur-md">
           <Squares2X2Icon className="h-10 w-10 text-white" />
           <div>
-            <p className="text-lg font-bold">₹1,200</p>
+            <p className="text-lg font-bold">₹ {totalSpent}</p>
             <p className="text-sm text-white/80">Your Balance</p>
           </div>
         </div>
