@@ -91,10 +91,10 @@ function Dashboard() {
     return <p className="text-cneter text-gray-500">Loading...</p>;
   }
 
-  const totalSpent = expenses.data.reduce(
-    (acc, expense) => acc + expense.amount,
-    0
-  );
+  const totalSpent = Array.isArray(expenses)
+    ? expenses.reduce((acc, expense) => acc + expense.amount, 0)
+    : 0;
+  //  this is main
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-300 font-inter p-6 pt-16">
       {/* Header */}
