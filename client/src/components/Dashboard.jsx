@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   UserGroupIcon,
   CurrencyDollarIcon,
@@ -11,6 +12,8 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -18,14 +21,20 @@ function Dashboard() {
     if (!token || !userData) {
       navigate("/login");
     } else {
+      console.log(userData);
       setUser(userData);
     }
   }, []);
 
   useEffect(() => {
+    console.log(user);
     const token = localStorage.getItem("token");
+    //   if (!user) return;
+    console.log(token);
     const fetchGroups = async () => {
       try {
+        setLoading(true);
+        console.log(token);
         const res = await axios.get(
           "https://fundmates-backend.onrender.com/api/groups",
           {
@@ -33,6 +42,7 @@ function Dashboard() {
           }
         );
         setGroups(res.data);
+        console.log(res.data);
       } catch (err) {
         console.error("Error fetching groups:", err);
         setError("Failed to load groups");
@@ -40,7 +50,6 @@ function Dashboard() {
         setLoading(false);
       }
     };
-
     fetchGroups();
   }, []);
 
@@ -50,6 +59,9 @@ function Dashboard() {
     navigate("/login");
   };
 
+  if (loading) {
+    return <p className="text-cneter text-gray-500">Loading...</p>;
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-300 font-inter p-6 pt-16">
       {/* Header */}

@@ -125,7 +125,7 @@ export default function Group({ onClose, onGroupCreated }) {
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="mb-6 text-2xl font-bold text-center text-blue-600">
+        <h2 className="mb-6 text-2xl font-bold tB                                                             ext-center text-blue-600">
           🚀 Create a New Group
         </h2>
 

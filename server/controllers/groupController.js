@@ -23,31 +23,19 @@ exports.createGroup = async (req, res) => {
 };
 
 exports.getMyGruops = async (req, res) => {
-  exports.getMyGruops = async (req, res) => {
-    try {
-      const userId = req.user._id;
-      const groups = await Group.find({
-        $or: [{ createdBy: userId }, { members: userId }],
-      }).sort({ createdAt: -1 });
-      res.status(200).json(groups);
-      console.log(res);
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: "Failed to fetch expenses", error: err.message });
-    }
-  };
   try {
     const userId = req.user._id;
+
     const groups = await Group.find({
-      $or: [{ createdBy: userId }, { "members.userId": userId }],
+      $or: [{ "createdBy.userId": userId }, { "members.userId": userId }],
     }).sort({ createdAt: -1 });
+
     res.status(200).json(groups);
-    console.log(res);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch expenses", error: err.message });
+    res.status(500).json({
+      message: "Failed to fetch groups",
+      error: err.message,
+    });
   }
 };
 
