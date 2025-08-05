@@ -133,14 +133,14 @@ function Dashboard() {
         <div className="bg-white/30 rounded-2xl p-6 shadow-md flex items-center space-x-4 backdrop-blur-md">
           <CurrencyDollarIcon className="h-10 w-10 text-white" />
           <div>
-            <p className="text-lg font-bold">₹12,350</p>
+            <p className="text-lg font-bold">₹{totalSpent}</p>
             <p className="text-sm text-white/80">Total Expenses</p>
           </div>
         </div>
         <div className="bg-white/30 rounded-2xl p-6 shadow-md flex items-center space-x-4 backdrop-blur-md">
           <Squares2X2Icon className="h-10 w-10 text-white" />
           <div>
-            <p className="text-lg font-bold">₹ {totalSpent}</p>
+            <p className="text-lg font-bold">₹{totalSpent}</p>
             <p className="text-sm text-white/80">Your Balance</p>
           </div>
         </div>
