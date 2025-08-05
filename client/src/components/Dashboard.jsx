@@ -149,12 +149,11 @@ function Dashboard() {
   }
 
   const youPaid = expenses
-    .filter((exp) => exp.paidBy?.userId === user.id)
+    .filter((exp) => exp.paidBy === user.id)
     .reduce((sum, exp) => sum + exp.amount, 0);
   console.log(youPaid);
   const othersPaid = expenses.filter(
-    (exp) =>
-      exp.paidBy?.userId !== user.id && exp.splitBetween.includes(user.id)
+    (exp) => exp.paidBy !== user.id && exp.splitBetween.includes(user.id)
   );
   console.log(othersPaid);
   const yourBalance = youPaid - othersPaid;
