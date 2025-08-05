@@ -30,14 +30,14 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    //   console.log(user);
+ //   console.log(user);
     const token = localStorage.getItem("token");
     //   if (!user) return;
-    //   console.log(token);
+ //   console.log(token);
     const fetchGroups = async () => {
       try {
         setLoading(true);
-        //     console.log(token);
+   //     console.log(token);
         const res = await axios.get(
           "https://fundmates-backend.onrender.com/api/groups",
           {
@@ -45,7 +45,7 @@ function Dashboard() {
           }
         );
         setGroups(res.data);
-        //     console.log(res.data);
+   //     console.log(res.data);
       } catch (err) {
         console.error("Error fetching groups:", err);
         setError("Failed to load groups");
@@ -60,11 +60,11 @@ function Dashboard() {
     console.log(user);
     const token = localStorage.getItem("token");
     //   if (!user) return;
-    //   console.log(token);
+ //   console.log(token);
     const fetchExpenses = async () => {
       try {
         setLoading(true);
-        //       console.log(token);
+ //       console.log(token);
         const res = await axios.get(
           "https://fundmates-backend.onrender.com/api/expenses",
           {
@@ -72,7 +72,7 @@ function Dashboard() {
           }
         );
         setExpenses(res.data);
-        //        console.log(res.data);
+//        console.log(res.data);
       } catch (err) {
         console.error("Error fetching groups:", err);
         setError("Failed to load groups");
@@ -149,13 +149,14 @@ function Dashboard() {
   }
 
   const youPaid = expenses
-    .filter((exp) => exp.paidBy === user.id)
+    .filter((exp) => exp.paidBy?.userId === user.id)
     .reduce((sum, exp) => sum + exp.amount, 0);
-  console.log(youPaid);
+
   const othersPaid = expenses.filter(
-    (exp) => exp.paidBy !== user.id && exp.splitBetween.includes(user.id)
+    (exp) =>
+      exp.paidBy?.userId !== user.id && exp.splitBetween.includes(user.id)
   );
-  console.log(othersPaid);
+
   const yourBalance = youPaid - othersPaid;
   //  this is main
   return (
