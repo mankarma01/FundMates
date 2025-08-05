@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Expense = require("../models/Expense");
 const Group = require("../models/Group");
 
@@ -48,7 +49,7 @@ exports.getMyExpenses = async (req, res) => {
 exports.getExpensesPaidByUser = async (req, res) => {
   try {
     const expenses = await Expense.find({
-      $or: [{ paidBy: req.user.id }],
+      paidBy: mongoose.Types.ObjectId(req.user.id),
     }).sort({ createdAt: -1 });
     res.json(expenses);
   } catch (err) {
@@ -61,9 +62,9 @@ exports.getExpensesPaidByUser = async (req, res) => {
 // get expnese all not paid by user
 exports.getExpensesnotbyuser = async (req, res) => {
   try {
-    const expenses = await Expense.find({
-      $or: [{ splitBetween: req.user.id }],
-    }).sort({ createdAt: -1 });
+    const expenses = await Expense.find({ splitBetween: req.user.id }).sort({
+      createdAt: -1,
+    });
     res.json(expenses);
   } catch (err) {
     res

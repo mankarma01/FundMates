@@ -12,7 +12,7 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
-//  const [expenses, setExpenses] = useState([]);
+  //  const [expenses, setExpenses] = useState([]);
   const [expensesbyuser, setExpensesbyuser] = useState([]);
   const [expensesSplitbyuser, setExpensesSplitbyuser] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -93,7 +93,7 @@ function Dashboard() {
         setLoading(true);
         console.log(token);
         const res = await axios.get(
-          "https://fundmates-backend.onrender.com/api/expenses",
+          "https://fundmates-backend.onrender.com/api/expenses/paidByUser",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -121,7 +121,7 @@ function Dashboard() {
         setLoading(true);
         console.log(token);
         const res = await axios.get(
-          "https://fundmates-backend.onrender.com/api/expenses",
+          "https://fundmates-backend.onrender.com/api/expenses/splitWithUser",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
