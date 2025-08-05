@@ -35,7 +35,7 @@ exports.createExpense = async (req, res) => {
 exports.getMyExpenses = async (req, res) => {
   try {
     const expenses = await Expense.find({
-      $or: [{ paidBy: req.user.id }, { splitBetween: req.user.id }],
+      $or: [{ paidBy: req.user._id }, { splitBetween: req.user._id }],
     }).sort({ createdAt: -1 });
     res.json(expenses);
   } catch (err) {
