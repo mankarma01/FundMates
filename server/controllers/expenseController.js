@@ -44,6 +44,34 @@ exports.getMyExpenses = async (req, res) => {
   }
 };
 
+// Get Total expenses paid by logged-in user
+exports.getExpensesPaidByUser = async (req, res) => {
+  try {
+    const expenses = await Expense.find({
+      $or: [{ paidBy: req.user.id }],
+    }).sort({ createdAt: -1 });
+    res.json(expenses);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch expenses", error: err.message });
+  }
+};
+
+// get expnese all not paid by user
+exports.getExpensesnotbyuser = async (req, res) => {
+  try {
+    const expenses = await Expense.find({
+      $or: [{ splitBetween: req.user.id }],
+    }).sort({ createdAt: -1 });
+    res.json(expenses);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch expenses", error: err.message });
+  }
+};
+
 //Get Expense by groupId
 exports.getExpenseByGroupId = async (req, res) => {
   try {
