@@ -12,9 +12,9 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
-  //  const [expenses, setExpenses] = useState([]);
-  const [expensesbyuser, setExpensesbyuser] = useState([]);
-  const [expensesSplitbyuser, setExpensesSplitbyuser] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  // const [expensesbyuser, setExpensesbyuser] = useState([]);
+  //  const [expensesSplitbyuser, setExpensesSplitbyuser] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -56,22 +56,49 @@ function Dashboard() {
     fetchGroups();
   }, []);
 
+  useEffect(() => {
+    console.log(user);
+    const token = localStorage.getItem("token");
+    //   if (!user) return;
+    console.log(token);
+    const fetchExpenses = async () => {
+      try {
+        setLoading(true);
+        console.log(token);
+        const res = await axios.get(
+          "https://fundmates-backend.onrender.com/api/expenses",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setExpenses(res.data);
+        console.log(res.data);
+      } catch (err) {
+        console.error("Error fetching groups:", err);
+        setError("Failed to load groups");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExpenses();
+  }, []);
+
   // useEffect(() => {
   //   console.log(user);
   //   const token = localStorage.getItem("token");
   //   //   if (!user) return;
   //   console.log(token);
-  //   const fetchExpenses = async () => {
+  //   const fetchAmount = async () => {
   //     try {
   //       setLoading(true);
   //       console.log(token);
   //       const res = await axios.get(
-  //         "https://fundmates-backend.onrender.com/api/expenses",
+  //         "https://fundmates-backend.onrender.com/api/expenses/paidByUser",
   //         {
   //           headers: { Authorization: `Bearer ${token}` },
   //         }
   //       );
-  //       setExpenses(res.data);
+  //       setExpensesbyuser(res.data);
   //       console.log(res.data);
   //     } catch (err) {
   //       console.error("Error fetching groups:", err);
@@ -80,63 +107,36 @@ function Dashboard() {
   //       setLoading(false);
   //     }
   //   };
-  //   fetchExpenses();
+  //   fetchAmount();
   // }, []);
 
-  useEffect(() => {
-    console.log(user);
-    const token = localStorage.getItem("token");
-    //   if (!user) return;
-    console.log(token);
-    const fetchAmount = async () => {
-      try {
-        setLoading(true);
-        console.log(token);
-        const res = await axios.get(
-          "https://fundmates-backend.onrender.com/api/expenses/paidByUser",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setExpensesbyuser(res.data);
-        console.log(res.data);
-      } catch (err) {
-        console.error("Error fetching groups:", err);
-        setError("Failed to load groups");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAmount();
-  }, []);
-
   // get all expenses not paid by user
-  useEffect(() => {
-    console.log(user);
-    const token = localStorage.getItem("token");
-    //   if (!user) return;
-    console.log(token);
-    const fetchExpensesNotByuser = async () => {
-      try {
-        setLoading(true);
-        console.log(token);
-        const res = await axios.get(
-          "https://fundmates-backend.onrender.com/api/expenses/splitWithUser",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setExpensesSplitbyuser(res.data);
-        console.log(res.data);
-      } catch (err) {
-        console.error("Error fetching groups:", err);
-        setError("Failed to load groups");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchExpensesNotByuser();
-  }, []);
+  // useEffect(() => {
+  //   console.log(user);
+  //   const token = localStorage.getItem("token");
+  //   //   if (!user) return;
+  //   console.log(token);
+  //   const fetchExpensesNotByuser = async () => {
+  //     try {
+  //       setLoading(true);
+  //       console.log(token);
+  //       const res = await axios.get(
+  //         "https://fundmates-backend.onrender.com/api/expenses/splitWithUser",
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       setExpensesSplitbyuser(res.data);
+  //       console.log(res.data);
+  //     } catch (err) {
+  //       console.error("Error fetching groups:", err);
+  //       setError("Failed to load groups");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchExpensesNotByuser();
+  // }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -148,15 +148,16 @@ function Dashboard() {
     return <p className="text-cneter text-gray-500">Loading...</p>;
   }
 
-  const totalSpent = Array.isArray(expensesbyuser)
-    ? expensesbyuser.reduce((acc, expense) => acc + expense.amount, 0)
-    : 0;
+  const youPaid = expenses
+    .filter((exp) => exp.paidBy?.userId === user.id)
+    .reduce((sum, exp) => sum + exp.amount, 0);
 
-  const totalSpentNotByUser = Array.isArray(expensesSplitbyuser)
-    ? expensesbyuser.reduce((acc, expense) => acc + expense.amount, 0)
-    : 0;
+  const othersPaid = expenses.filter(
+    (exp) =>
+      exp.paidBy?.userId !== user.id && exp.splitBetween.includes(user.id)
+  );
 
-  const yourBalance = totalSpent - totalSpentNotByUser;
+  const yourBalance = youPaid - othersPaid;
   //  this is main
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-300 font-inter p-6 pt-16">
@@ -196,7 +197,7 @@ function Dashboard() {
         <div className="bg-white/30 rounded-2xl p-6 shadow-md flex items-center space-x-4 backdrop-blur-md">
           <CurrencyDollarIcon className="h-10 w-10 text-white" />
           <div>
-            <p className="text-lg font-bold">₹{totalSpent}</p>
+            <p className="text-lg font-bold">₹{youPaid}</p>
             <p className="text-sm text-white/80">Total Expenses</p>
           </div>
         </div>
