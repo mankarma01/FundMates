@@ -8,48 +8,48 @@ function AddExpense() {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [group, setGroup] = useState("");
-  const [splitBetween, setSplitBetween] = useState([]);
-  // const [allUsers, setAllUsers] = useState([]);
   const [groups, setGroups] = useState([]);
+
+  // Correct usage for your environment variable!
+  const API_URL = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
-
-  // ✅ Fetch users & groups for dropdowns
+  // Fetch groups for the dropdown
   useEffect(() => {
-    const fetchData = async () => {
+    if (!token) return;
+    const fetchGroups = async () => {
       try {
-        // const userRes = await axios.get("https://fundmates-backend.onrender.com/api/users", {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // });
-        // setAllUsers(userRes.data);
-
-        const groupRes = await axios.get(
-          "https://fundmates-backend.onrender.com/api/groups",
+        const res = await axios.get(
+          `${API_URL}/api/groups`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` }
           }
         );
-        setGroups(groupRes.data);
-        console.log("Groups fetched:", groupRes.data);
+        setGroups(res.data);
       } catch (err) {
-        console.error("Error fetching users/groups", err);
+        console.error("Error fetching groups:", err);
       }
     };
-    fetchData();
-  }, [token]);
+    fetchGroups();
+  }, [token, API_URL]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!token) {
+      alert("Please log in first!");
+      navigate("/login");
+      return;
+    }
     try {
       await axios.post(
-        "https://fundmates-backend.onrender.com/api/expenses",
+        `${API_URL}/api/expenses`,
         {
           title,
-          amount,
+          amount: Number(amount),
           description,
           group: group || null,
-          splitBetween,
+     //     splitBetween: [] // Not needed if your backend uses all group members
         },
         {
           headers: {
@@ -60,8 +60,8 @@ function AddExpense() {
       alert("Expense added successfully!");
       navigate("/dashboard");
     } catch (err) {
-      console.error("Error adding expense", err);
-      alert("Failed to add expense");
+      console.error("Error adding expense:", err);
+      alert("Failed to add expense. Please try again.");
     }
   };
 
@@ -134,28 +134,7 @@ function AddExpense() {
             </select>
           </div>
 
-          {/* Split Between */}
-          {/* <div>
-            <label className="block text-sm mb-1 font-medium">
-              Split Between
-            </label>
-            <select
-              multiple
-              className="w-full px-4 py-2 rounded bg-white/30 text-white border border-white/40 focus:outline-none"
-              value={splitBetween}
-              onChange={(e) =>
-                setSplitBetween(
-                  Array.from(e.target.selectedOptions, (option) => option.value)
-                )
-              }
-            >
-              {allUsers.map((u) => (
-                <option key={u._id} value={u._id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
-          </div> */}
+          {/* If you later want to add "splitBetween", implement as needed */}
 
           {/* Submit Button */}
           <button

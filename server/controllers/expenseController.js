@@ -1,30 +1,52 @@
 const { default: mongoose } = require("mongoose");
 const Expense = require("../models/Expense");
 const Group = require("../models/Group");
+const { updateBalancesForExpense } = require("../services/balanceService");
+console.log("Is updateBalancesForExpense a function?", typeof updateBalancesForExpense);
+
+console.log("About to require balanceService.js");
+const balanceService = require("../services/balanceService");
+console.log("balanceService loaded:", balanceService);
 
 // Create Expense
 exports.createExpense = async (req, res) => {
-  try {
-    const { title, amount, description, group, splitBetween, date } = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    const groupDetails = await Group.findById(group);
-    const memberArr = groupDetails.members;
-    console.log(groupDetails.members);
+  try {
+    const { title, amount, description, group, date } = req.body;
+    const paidBy = req.user.id;
+
+    const groupData = await Group.findById(group).session(session);
+    if (!groupData) {
+      throw new Error("Group not found");
+    }
+    const members = groupData.members.map(m => m.userId.toString());
+
+    await updateBalancesForExpense(group, paidBy, amount, members, session);
+  
     const expense = await Expense.create({
       title,
       amount,
       description,
       paidBy: {
-        userId: req.user._id,
+        userId: req.user.id,
         name: req.user.name,
       },
       group: group || null,
-      splitBetween: memberArr,
+      splitBetween: members,
       date: date || Date.now(),
     });
-    //   console.log(res.user)
-    res.status(201).json(expense);
+
+    
+    await session.commitTransaction();
+    session.endSession();
+    res.status(201).json({ message: "Expense created successfully"})
+    // 3. Split amount equally
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error creating expense", err);
     res
       .status(500)
       .json({ message: "Failed to create expense", error: err.message });
@@ -34,8 +56,9 @@ exports.createExpense = async (req, res) => {
 // Get all expenses for logged-in user (personal + where user paid //)
 exports.getMyExpenses = async (req, res) => {
   try {
+    const userId = req.user._id;
     const expenses = await Expense.find({
-      $or: [{ paidBy: req.user._id }, { splitBetween: req.user._id }],
+      $or: [{ "paidBy.userId": userId }, { splitBetween: userId }],
     }).sort({ createdAt: -1 });
     res.json(expenses);
   } catch (err) {
@@ -47,10 +70,11 @@ exports.getMyExpenses = async (req, res) => {
 
 // Get Total expenses paid by logged-in user
 exports.getExpensesPaidByUser = async (req, res) => {
+  const { groupIds } = req.body;
   try {
     const expenses = await Expense.find({
-      paidBy: mongoose.Types.ObjectId(req.user.id),
-    }).sort({ createdAt: -1 });
+      group: { $in: groupIds },
+    });
     res.json(expenses);
   } catch (err) {
     res

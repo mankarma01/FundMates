@@ -3,19 +3,24 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Profile = () => {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
-  );
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  //  console.log(user);
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      setLoading(true);
       try {
-        const token = localStorage.getItem("token");
-        //     console.log(token);
         const response = await axios.post(
-          "https://fundmates-backend.onrender.com/api/users/profile",
+          `${API_URL}/api/users/profile`,
           {},
           {
             headers: {
@@ -23,16 +28,23 @@ const Profile = () => {
             },
           }
         );
-        console.log(response.data.user);
-        setUser(response.data.user);
+        if (response.data.user) {
+          setUser(response.data.user);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+        } else {
+          // If no user data received, redirect to login
+          navigate("/login");
+        }
       } catch (err) {
         console.error("Failed to fetch user profile:", err);
-        //     navigate("/login");
+        navigate("/login");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUserProfile();
-  }, [navigate]);
+  }, [API_URL, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -40,7 +52,14 @@ const Profile = () => {
     navigate("/login");
   };
 
-  if (!user) return <p className="text-center text-white mt-10">Loading...</p>;
+  if (loading) return <p className="text-center text-white mt-10">Loading...</p>;
+
+  if (!user)
+    return (
+      <p className="text-center text-white mt-10">
+        User not found. Please <button onClick={() => navigate("/login")} className="underline">login</button>.
+      </p>
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-300 py-12 px-4">
@@ -58,24 +77,18 @@ const Profile = () => {
             <span className="font-semibold">Email:</span> {user.email}
           </p>
           <p>
-            <span className="font-semibold">Mobile:</span>{" "}
-            {user.mobile || "Not provided"}
+            <span className="font-semibold">Mobile:</span> {user.mobile || "Not provided"}
           </p>
           <p>
-            <span className="font-semibold">Gender:</span>{" "}
-            {user.gender || "Not provided"}
+            <span className="font-semibold">Gender:</span> {user.gender || "Not provided"}
           </p>
           <p>
             <span className="font-semibold">Date of Birth:</span>{" "}
-            {user.dob
-              ? new Date(user.dob).toLocaleDateString()
-              : "Not provided"}
+            {user.dob ? new Date(user.dob).toLocaleDateString() : "Not provided"}
           </p>
           <p>
             <span className="font-semibold">Joined:</span>{" "}
-            {user.createdAt
-              ? new Date(user.createdAt).toLocaleDateString()
-              : "Not provided"}
+            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Not provided"}
           </p>
         </div>
 

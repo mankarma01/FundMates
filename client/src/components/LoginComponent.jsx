@@ -12,28 +12,30 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  // Declare API_URL from your frontend .env file
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "https://fundmates-backend.onrender.com/api/users/login",
-        {
-          email,
-          password,
-        }
-      );
+      const res = await axios.post(`${API_URL}/api/users/login`, {
+        email,
+        password,
+      });
 
       console.log(res.data);
-      console.log("Sucess");
+      console.log("Success");
+
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      const user = JSON.parse(localStorage.getItem("user")); // ✅ get it back
+      const user = JSON.parse(localStorage.getItem("user")); // ✅ verify user stored
       console.log(user);
+
       navigate("/dashboard");
     } catch (err) {
-      alert("Something went wrong", err);
-      console.log(err);
+      alert("Something went wrong");
+      console.error(err);
     }
   };
 

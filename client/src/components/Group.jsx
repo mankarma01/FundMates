@@ -10,6 +10,8 @@ export default function Group({ onClose, onGroupCreated }) {
   const [formError, setFormError] = useState("");
   const [memberNames, setMemberNames] = useState([]);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleAddMember = () => {
     setMemberEmails((prev) => [...prev, ""]);
     setMemberErrors((prev) => [...prev, ""]);
@@ -30,35 +32,44 @@ export default function Group({ onClose, onGroupCreated }) {
     setMemberEmails(updatedEmails);
 
     const updatedErrors = [...memberErrors];
-    updatedErrors[index] = ""; // clear previous error
+    updatedErrors[index] = ""; // clear errors on change
     setMemberErrors(updatedErrors);
 
     const updatedNames = [...memberNames];
     updatedNames[index] = "";
     setMemberNames(updatedNames);
+
+    const updatedIds = [...memberIds];
+    updatedIds[index] = "";
+    setMemberIds(updatedIds);
   };
 
   const handleValidateEmail = async (index) => {
     const token = localStorage.getItem("token");
-    const email = memberEmails[index];
-    if (!email.includes("@")) return; // don't check partial
+    const email = memberEmails[index].trim();
+
+    if (!email || !email.includes("@")) {
+      // If invalid email format, skip validation
+      return;
+    }
 
     try {
       const res = await axios.get(
-        `https://fundmates-backend.onrender.com/api/users/by-email/${email}`,
+        `${API_URL}/api/users/by-email/${encodeURIComponent(email)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const userId = res.data.id;
+      const userId = res.data.id || res.data._id; // Adjust based on your backend response
       const userName = res.data.name;
+
       const updatedIds = [...memberIds];
       updatedIds[index] = userId;
       setMemberIds(updatedIds);
 
-      const updateNames = [...memberNames];
-      updateNames[index] = userName;
-      setMemberNames(updateNames);
+      const updatedNames = [...memberNames];
+      updatedNames[index] = userName;
+      setMemberNames(updatedNames);
 
       const updatedErrors = [...memberErrors];
       updatedErrors[index] = "";
@@ -78,8 +89,18 @@ export default function Group({ onClose, onGroupCreated }) {
     e.preventDefault();
     setFormError("");
 
-    // Check if all members are valid
-    if (memberIds.some((id) => !id)) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setFormError("You must be logged in to create a group.");
+      return;
+    }
+
+    if (!groupName.trim()) {
+      setFormError("Group name is required.");
+      return;
+    }
+
+    if (memberIds.length === 0 || memberIds.some((id) => !id)) {
       setFormError(
         "Please ensure all member emails are valid before submitting."
       );
@@ -87,11 +108,10 @@ export default function Group({ onClose, onGroupCreated }) {
     }
 
     try {
-      const token = localStorage.getItem("token");
       const { data } = await axios.post(
-        "https://fundmates-backend.onrender.com/api/groups",
+        `${API_URL}/api/groups`,
         {
-          groupName,
+          groupName: groupName.trim(),
           members: memberIds.map((id, index) => ({
             userId: id,
             name: memberNames[index],
@@ -101,13 +121,15 @@ export default function Group({ onClose, onGroupCreated }) {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log(memberIds);
+
       onGroupCreated?.(data);
       alert("Group Created Successfully!");
       onClose();
     } catch (error) {
-      console.error("Failed to create group", error.message);
-      setFormError(error.message || "Something went wrong");
+      console.error("Failed to create group", error);
+      setFormError(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 
@@ -125,7 +147,7 @@ export default function Group({ onClose, onGroupCreated }) {
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="mb-6 text-2xl font-bold tB                                                             ext-center text-blue-600">
+        <h2 className="mb-6 text-2xl font-bold text-center text-blue-600">
           🚀 Create a New Group
         </h2>
 
@@ -183,6 +205,7 @@ export default function Group({ onClose, onGroupCreated }) {
                 </div>
               </div>
             ))}
+
             <button
               type="button"
               onClick={handleAddMember}

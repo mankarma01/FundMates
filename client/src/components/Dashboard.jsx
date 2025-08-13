@@ -13,39 +13,36 @@ function Dashboard() {
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [expenses, setExpenses] = useState([]);
-  // const [expensesbyuser, setExpensesbyuser] = useState([]);
-  //  const [expensesSplitbyuser, setExpensesSplitbyuser] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Get API URL from environment variable
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Get User details from localstrorage
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!token || !userData) {
       navigate("/login");
     } else {
-      console.log(userData);
       setUser(userData);
     }
-  }, []);
+  }, [navigate]);
 
+  // Get total groups from DB where user is logged in
   useEffect(() => {
- //   console.log(user);
     const token = localStorage.getItem("token");
-    //   if (!user) return;
- //   console.log(token);
+    if (!token) return;
+
     const fetchGroups = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-   //     console.log(token);
-        const res = await axios.get(
-          "https://fundmates-backend.onrender.com/api/groups",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await axios.get(`${API_URL}/api/groups`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setGroups(res.data);
-   //     console.log(res.data);
+        setError(null);
       } catch (err) {
         console.error("Error fetching groups:", err);
         setError("Failed to load groups");
@@ -53,90 +50,36 @@ function Dashboard() {
         setLoading(false);
       }
     };
+
     fetchGroups();
-  }, []);
+  }, [API_URL]);
 
   useEffect(() => {
-    console.log(user);
     const token = localStorage.getItem("token");
-    //   if (!user) return;
- //   console.log(token);
+    if (!token) return;
+    const groupIds = groups.map((g) => g._id);
     const fetchExpenses = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
- //       console.log(token);
-        const res = await axios.get(
-          "https://fundmates-backend.onrender.com/api/expenses",
+        const res = await axios.post(
+          `${API_URL}/api/expenses/by-gorups`,
+          { groupIds },
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         setExpenses(res.data);
-//        console.log(res.data);
+        setError(null);
       } catch (err) {
-        console.error("Error fetching groups:", err);
-        setError("Failed to load groups");
+        console.error("Error fetching expenses:", err);
+        setError("Failed to load expenses");
       } finally {
         setLoading(false);
       }
     };
+
     fetchExpenses();
-  }, []);
-
-  // useEffect(() => {
-  //   console.log(user);
-  //   const token = localStorage.getItem("token");
-  //   //   if (!user) return;
-  //   console.log(token);
-  //   const fetchAmount = async () => {
-  //     try {
-  //       setLoading(true);
-  //       console.log(token);
-  //       const res = await axios.get(
-  //         "https://fundmates-backend.onrender.com/api/expenses/paidByUser",
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       setExpensesbyuser(res.data);
-  //       console.log(res.data);
-  //     } catch (err) {
-  //       console.error("Error fetching groups:", err);
-  //       setError("Failed to load groups");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchAmount();
-  // }, []);
-
-  // get all expenses not paid by user
-  // useEffect(() => {
-  //   console.log(user);
-  //   const token = localStorage.getItem("token");
-  //   //   if (!user) return;
-  //   console.log(token);
-  //   const fetchExpensesNotByuser = async () => {
-  //     try {
-  //       setLoading(true);
-  //       console.log(token);
-  //       const res = await axios.get(
-  //         "https://fundmates-backend.onrender.com/api/expenses/splitWithUser",
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       setExpensesSplitbyuser(res.data);
-  //       console.log(res.data);
-  //     } catch (err) {
-  //       console.error("Error fetching groups:", err);
-  //       setError("Failed to load groups");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchExpensesNotByuser();
-  // }, []);
+  }, [groups, API_URL]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -145,20 +88,36 @@ function Dashboard() {
   };
 
   if (loading) {
-    return <p className="text-cneter text-gray-500">Loading...</p>;
+    return <p className="text-center text-gray-500">Loading...</p>;
   }
 
-  const youPaid = expenses
-    .filter((exp) => exp.paidBy?.userId === user.id)
+  if (!user) {
+    // Optionally return null or a loading state until user is loaded
+    return null;
+  }
+
+  // Calculate total you paid
+  const totalSpendByYou = expenses
+    .filter((exp) => exp.paidBy.userId === user.id)
     .reduce((sum, exp) => sum + exp.amount, 0);
 
-  const othersPaid = expenses.filter(
-    (exp) =>
-      exp.paidBy?.userId !== user.id && exp.splitBetween.includes(user.id)
-  );
+  const OwnAmount = expenses
+    .filter((exp) => exp.paidBy.userId === user.id)
+    .reduce(
+      (sum, exp) =>
+        sum +
+        (exp.amount / exp.splitBetween.length) * (exp.splitBetween.length - 1),
+      0
+    );
 
-  const yourBalance = youPaid - othersPaid;
-  //  this is main
+  const amountYouShouldPay = expenses
+    .filter(
+      (exp) => exp.paidBy.userId !== user.id && exp.splitBetween.length > 1
+    )
+    .reduce((sum, exp) => sum + exp.amount / exp.splitBetween.length, 0);
+
+  const yourBalance = OwnAmount - amountYouShouldPay;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-pink-300 font-inter p-6 pt-16">
       {/* Header */}
@@ -178,14 +137,14 @@ function Dashboard() {
       {/* Welcome Message */}
       <div className="bg-white/20 backdrop-blur-xl text-white rounded-2xl shadow-xl p-6 mb-8 text-center">
         <h2 className="text-2xl font-semibold">
-          Welcome back, {user?.name || "User"} 👋
+          Welcome back, {user.name || "User"} 👋
         </h2>
         <p className="text-white/90 mt-1">
           Let's manage your group expenses smartly and transparently.
         </p>
       </div>
 
-      {/* Stats Section */}
+      {/* Strats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-white">
         <div className="bg-white/30 rounded-2xl p-6 shadow-md flex items-center space-x-4 backdrop-blur-md">
           <UserGroupIcon className="h-10 w-10 text-white" />
@@ -197,7 +156,7 @@ function Dashboard() {
         <div className="bg-white/30 rounded-2xl p-6 shadow-md flex items-center space-x-4 backdrop-blur-md">
           <CurrencyDollarIcon className="h-10 w-10 text-white" />
           <div>
-            <p className="text-lg font-bold">₹{youPaid}</p>
+            <p className="text-lg font-bold">₹{totalSpendByYou}</p>
             <p className="text-sm text-white/80">Total Expenses</p>
           </div>
         </div>
@@ -215,6 +174,11 @@ function Dashboard() {
         🚧 More features like group list, recent activity, charts, etc. coming
         soon!
       </div>
+
+      {/* Show Error if any */}
+      {error && (
+        <p className="mt-4 text-center text-red-500 font-semibold">{error}</p>
+      )}
     </div>
   );
 }

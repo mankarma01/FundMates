@@ -13,12 +13,14 @@ function Register() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // Inside handleRegister
+  // Make sure to define API_URL from your environment variables
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "https://fundmates-backend.onrender.com/api/users/register",
+        `${API_URL}/api/users/register`,
         {
           name,
           email,

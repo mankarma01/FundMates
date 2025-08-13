@@ -1,7 +1,7 @@
 const expenseRoutes = require("./routes/expenseRoutes");
 const userRoutes = require("./routes/userRoutes");
 const groupRoutes = require("./routes/groupRoutes");
-// const authRoutes = require("./routes/authRoutes");
+ const balanceRoutes = require("./routes/balanceRoutes");
 
 const express = require("express");
 const cors = require("cors"); // ✅ Add this
@@ -13,22 +13,23 @@ connectDB();
 
 const app = express();
 
-// ✅ Enable CORS
 app.use(
   cors({
-    origin: "https://incandescent-pastelito-21f7fa.netlify.app", // ✅ NEW frontend URL
+    origin: [
+      "http://localhost:5173", // React local dev
+      "incandescent-pastelito-21f7fa.netlify.app", // deployed site
+    ],
     credentials: true,
   })
 );
 
-
 app.use(express.json());
 
 // ✅ Routes
-// app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/groups", groupRoutes);
+app.use("/api/balances", balanceRoutes);
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;

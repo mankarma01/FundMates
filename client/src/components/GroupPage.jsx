@@ -10,21 +10,29 @@ function GroupsPage() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Declare API_URL from your .env
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleOpen = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
 
-  // 🔽 Fetch groups from backend
+  // Fetch groups from backend
   useEffect(() => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      setError("You must be logged in to view groups.");
+      setLoading(false);
+      return;
+    }
+
     const fetchGroups = async () => {
       try {
-        const res = await axios.get(
-          "https://fundmates-backend.onrender.com/api/groups",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        setLoading(true);
+        const res = await axios.get(`${API_URL}/api/groups`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setGroups(res.data);
+        setError(null);
       } catch (err) {
         console.error("Error fetching groups:", err);
         setError("Failed to load groups");
@@ -34,9 +42,9 @@ function GroupsPage() {
     };
 
     fetchGroups();
-  }, []);
+  }, [API_URL]);
 
-  // 🔽 Update groups after a new group is created
+  // Update groups after a new group is created
   const handleGroupCreated = (newGroup) => {
     setGroups((prev) => [...prev, newGroup]);
     handleClose();
