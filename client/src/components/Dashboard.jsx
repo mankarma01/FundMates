@@ -18,6 +18,7 @@ function Dashboard() {
 
   // Get API URL from environment variable
   const API_URL = import.meta.env.VITE_API_URL;
+console.log(import.meta.env.VITE_API_URL);
 
   // Get User details from localstrorage
   useEffect(() => {
