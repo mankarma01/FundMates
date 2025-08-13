@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // React local dev
-      "http://incandescent-pastelito-21f7fa.netlify.app", // deployed site
+      "https://incandescent-pastelito-21f7fa.netlify.app", // deployed site
     ],
     credentials: true,
   })
